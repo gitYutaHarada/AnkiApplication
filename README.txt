@@ -2,11 +2,8 @@
 プロジェクトの概要
 本アプリは、ユーザーが単語やフレーズを暗記しやすくするための学習支援ツール
 
-今できてること
-ログイン機能
-
 技術スタック
-使用言語　mysql,Java,JavaScript,JSP,CSS
+使用言語　Java,mysql,JSP,CSS,JavaScript
 
 今できてること
 管理ユーザ登録機能
