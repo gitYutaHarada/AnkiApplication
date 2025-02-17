@@ -122,18 +122,23 @@ public class CreateUserDAO {
 		disconnect();
 	}
 	
-	public int getDataOfFileMax(String fileName, String name) {
+	public int getDataOfFile_max_min(String fileName, String name, String max_min) {
 		Statement statement = null;
 		ResultSet result_set = null;
-		int maxDataId = 0;
-		String getDataOfFile_sql = "SELECT MAX(dataId) AS maxDataId FROM dataof_" + fileName + "_" + name;
+		int DataId_max_min = 0;
+		String getDataOfFile_sql;
+		if("max".equals(max_min)) {
+			getDataOfFile_sql = "SELECT MAX(dataId) AS maxDataId FROM dataof_" + fileName + "_" + name;
+		}else {
+			getDataOfFile_sql = "SELECT MIN(dataId) AS maxDataId FROM dataof_" + fileName + "_" + name;
+		}
 	
 		try {
 			connectDB();
 			statement = connection.createStatement();
 			result_set = statement.executeQuery(getDataOfFile_sql);
 			if(result_set.next()) {
-				maxDataId = result_set.getInt("maxDataId");
+				DataId_max_min = result_set.getInt("maxDataId");
 			}
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -147,7 +152,7 @@ public class CreateUserDAO {
 		}
 		
 		disconnect();
-		return maxDataId;
+		return DataId_max_min;
 	}
 	public int createUser(String name, String password) {
 		Statement statement = null;

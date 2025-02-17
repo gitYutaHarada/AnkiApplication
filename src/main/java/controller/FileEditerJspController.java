@@ -54,7 +54,7 @@ public class FileEditerJspController extends HttpServlet {
 	    UserBean userbean = (UserBean) session.getAttribute("userbean");
 		FileOfData fileofdata = new FileOfData();
 		createuser_dao.setDataOfFile(fileofdata, fileName, userName);
-		fileofdata.setMaxId(createuser_dao.getDataOfFileMax(fileName, userName));
+		fileofdata.setMaxId(createuser_dao.getDataOfFile_max_min(fileName, userName, "max"));
 		fileofdata.setFileName(fileName);
 		
 		session.setAttribute("fileofdata", fileofdata);

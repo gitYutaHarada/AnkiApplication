@@ -19,53 +19,53 @@ if (request.getAttribute("deleteFile_count") != null)
 <html>
 <head>
 <meta charset="UTF-8">
-<title>ログイン成功！</title>
-<link href="myPageCss.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="/AnkiApplication/css/style.css">
+	<title>ログイン成功！</title>
+	<link href="myPageCss.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 	<p>ログイン成功！</p>
-	<p>
-		こんにちは <strong><%=userbean.getName()%> さん!</strong>
-	</p>
+	<p>こんにちは <strong><%=userbean.getName()%> さん!</strong></p>
 	<br />
-
-	<%
-	for (int i = 0; i < userbean.getFileNamesSize(); i++) {
-	%>
-	<form action="/AnkiApplication/FileEditerJspController" method="post">
-		<figcaption><%=userbean.getFileName(i)%></figcaption>
-		<button type="submit">
-			<img src="images/file.jpg" alt="Image <%=i + 1%>" name="" width="100"
-				height="100">
-		</button>
-
-		<input type="hidden" name="fileName"
-			value="<%=userbean.getFileName(i)%>"> <input type="hidden"
-			name="userName" value="<%=userbean.getName()%>">
-
-	</form>
-	<form action="/AnkiApplication/MyPageController" method="post" onsubmit="return confirmDelete()">
-		<button type="submit" name="action" value="remove">ファイルの削除</button>
-
-		<input type="hidden" name="remove_fileName"
-			value="<%=userbean.getFileName(i)%>">
-	</form>
-	<%
-	}
-	%>
-
+	<table id="file_editer">
+		<%
+			for (int i = 0; i < userbean.getFileNamesSize(); i++) {
+		%>
+		<th>
+			<form action="/AnkiApplication/FileEditerJspController" method="post">
+				<figcaption><%=userbean.getFileName(i)%></figcaption>
+				<button type="submit">
+					<img src="images/file.jpg" alt="Image <%=i + 1%>" name="" width="100" height="100">
+				</button>
+		
+				<input type="hidden" name="fileName" value="<%=userbean.getFileName(i)%>"> 
+				<input type="hidden" name="userName" value="<%=userbean.getName()%>">
+		
+			</form>
+			<br/>
+			<form action="/AnkiApplication/MyPageController" method="post" onsubmit="return confirmDelete()">
+				<button type="submit" name="action" value="remove">ファイルの削除</button>
+		
+				<input type="hidden" name="remove_fileName" value="<%=userbean.getFileName(i)%>">
+			</form>
+		<%
+			}
+		%>
+		</th>
+	</table>
+	<br/>
 	<form action="/AnkiApplication/MyPageController" method="post">
-		<label for="create_imageName">作成するファイル名:</label> <input type="text"
-			id="create_imageName" name="create_fileName" placeholder="ファイル名を入力">
+		<label for="create_imageName">作成するファイル名:</label>
+		<input type="text" id="create_imageName" name="create_fileName" placeholder="ファイル名を入力">
 		<button type="submit" name="action" value="create">新しいファイルの作成</button>
 
 		<input type="hidden" name="userName" value="<%=userbean.getName()%>">
 	</form>
 
-<script>
-	function confirmDelete() {
-	    return confirm("本当にこのファイルを削除しますか？");
-	}
-</script>
+	<script>
+		function confirmDelete() {
+		    return confirm("本当にこのファイルを削除しますか？");
+		}
+	</script>
 </body>
 </html>

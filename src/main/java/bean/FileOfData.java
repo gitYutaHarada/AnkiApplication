@@ -7,6 +7,7 @@ import java.util.Map;
 public class FileOfData implements Serializable{
 	public String fileName;
 	public int maxId = 0;
+	public int minId = 0;
 	public HashMap<Integer, String> question = new HashMap<>();
 	public HashMap<Integer, String> answer = new HashMap<>();
 
@@ -80,6 +81,14 @@ public class FileOfData implements Serializable{
 	
 	public int getMaxId() {
 		return this.maxId;
+	}
+	
+	public int getMinId() {
+		return this.minId;
+	}
+
+	public void setMinId(int minId) {
+		this.minId = minId;
 	}
 	
 	public int getIdByQuestion(String question) {
