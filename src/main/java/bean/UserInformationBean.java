@@ -1,14 +1,12 @@
-package data_transfer_object;
+package bean;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import bean.UserBean;
-
-public class UserInformationDTO implements Serializable {
+public class UserInformationBean implements Serializable {
     private ArrayList<UserBean> user_bean_list = new ArrayList<>();
 
-    public UserInformationDTO(){
+    public UserInformationBean(){
         user_bean_list = new ArrayList<UserBean>();
     }
 

@@ -5,11 +5,14 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import bean.FileOfData;
 import bean.UserBean;
-import data_transfer_object.UserInformationDTO;
+import bean.UserInformationBean;
 
 public class CreateUserDAO {
 	private final String URL = "jdbc:mysql://localhost:3306/userinformation";
@@ -22,10 +25,10 @@ public class CreateUserDAO {
 		connection = DriverManager.getConnection(URL, USER, PASS);
 	}
 
-	public UserInformationDTO select() {
+	public UserInformationBean select() {
 		Statement statement = null;
 		ResultSet result_set = null;
-		UserInformationDTO user_info_dto = new UserInformationDTO();
+		UserInformationBean user_info_dto = new UserInformationBean();
 		String sql = "SELECT * FROM user";
 
 		try {
@@ -58,7 +61,94 @@ public class CreateUserDAO {
 		return user_info_dto;
 
 	}
-
+	
+	public List<String> getAllFileName(String name) {
+		Statement statement = null;
+		ResultSet result_set = null;
+		List<String> fileNamesList = new ArrayList<>();
+		String getAllFileName_sql = "SELECT TABLE_NAME "
+		        + "FROM INFORMATION_SCHEMA.TABLES "
+		        + "WHERE TABLE_NAME LIKE 'dataof\\_%\\_" + name + "';";
+		
+		try {
+			connectDB();
+			statement = connection.createStatement();
+			result_set = statement.executeQuery(getAllFileName_sql);
+			
+			while(result_set.next()) {
+			    String dataof_filename_user = result_set.getString("TABLE_NAME");
+			    String[] fileNameParts = dataof_filename_user.split("_");
+			    fileNamesList.add(fileNameParts[1]);
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(result_set != null)result_set.close();
+				if(statement != null)statement.close();
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		disconnect();
+		return fileNamesList;
+	}
+	
+	public void setDataOfFile(FileOfData fileofdata, String fileName, String name){
+		Statement statement = null;
+		ResultSet result_set = null;
+		String getDataOfFile_sql = "SELECT * FROM DATAOF_" + fileName + "_" + name;	
+		try {
+			connectDB();
+			statement = connection.createStatement();
+			result_set = statement.executeQuery(getDataOfFile_sql);
+			
+			while(result_set.next()) {
+				fileofdata.setElement(result_set.getInt("dataId"), result_set.getString("question"), result_set.getString("answer"));
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(result_set != null) result_set.close();
+				if(statement != null) statement.close();
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		disconnect();
+	}
+	
+	public int getDataOfFileMax(String fileName, String name) {
+		Statement statement = null;
+		ResultSet result_set = null;
+		int maxDataId = 0;
+		String getDataOfFile_sql = "SELECT MAX(dataId) AS maxDataId FROM dataof_" + fileName + "_" + name;
+	
+		try {
+			connectDB();
+			statement = connection.createStatement();
+			result_set = statement.executeQuery(getDataOfFile_sql);
+			if(result_set.next()) {
+				maxDataId = result_set.getInt("maxDataId");
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(result_set != null) result_set.close();
+				if(statement != null) statement.close();
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		disconnect();
+		return maxDataId;
+	}
 	public int createUser(String name, String password) {
 		Statement statement = null;
 		ResultSet serch_id = null;
@@ -94,9 +184,9 @@ public class CreateUserDAO {
 		//新しいIDをセットしたSQL文
 		String insert_sql = "INSERT INTO user VALUES (" + newId + ", '" + name + "', '" + password + "')";
 
-		int createFile_int = executeSql(createFiles_sql);
+		int createFile_int = executeUpdateSql(createFiles_sql);
 
-		return executeSql(insert_sql);
+		return executeUpdateSql(insert_sql);
 	}
 
 	public boolean isLogin(String name, String pass) {
@@ -168,23 +258,109 @@ public class CreateUserDAO {
 	}
 
 	public void addFileName(String name, String fileName) {
-		String addFileName_sql = "INSERT INTO FILEOF_" + name + "(fileName)VALUES('" + fileName + "')";
 		String addFileData_sql = "CREATE TABLE DATAOF_" + fileName + "_" + name + "("
+				+ "dataId INT PRIMARY KEY AUTO_INCREMENT,"
 				+ "question varchar(100),"
 				+ "answer varchar(100)"
 				+ ");";
-
-		int addFileName_int = executeSql(addFileName_sql);
-		int addFileData_int = executeSql(addFileData_sql);
+		int addFileData_int = executeUpdateSql(addFileData_sql);
 	}
-
-	public void addData(String name, String fileName, String question, String answer) {
+	
+	public void addData(FileOfData fileofdata, String name, String fileName, String question, String answer) {
 		String addData_sql = "INSERT INTO DATAOF_" + fileName + "_" + name + " (question, answer) VALUES('"
 				+ question + "', '" + answer + "');";
-		int addData_int = executeSql(addData_sql);
+		int addData_int = executeUpdateSql(addData_sql);
+		
+		int id = serchidByQuestion(name, fileName, question, answer);
+		fileofdata.setElement(id, question, answer);
+	}
+	
+	public int serchidByQuestion(String name, String fileName, String question, String answer) {
+		Statement statement = null;
+		ResultSet result_set = null;
+		String serchId_sql = "SELECT dataId FROM dataof_" + fileName + "_" + name + " WHERE question = '" + question + "'";
+		int id = 0;
+		
+		try {
+			connectDB();
+			statement = connection.createStatement();
+			result_set = statement.executeQuery(serchId_sql);
+			if(result_set.next()) {
+				id = result_set.getInt("dataId");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (result_set != null)
+					result_set.close();
+				if (statement != null)
+					statement.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		disconnect();
+		return id;
+
+	}
+	
+	public boolean isData(String fileName, String name) {
+		Statement statement = null;
+		ResultSet result_set = null;
+		String isData_sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'dataof_" + fileName + "_" + name + "';";
+		Boolean isData = false;
+		try {
+			connectDB();
+			statement = connection.createStatement();
+			result_set = statement.executeQuery(isData_sql);
+			result_set.next();
+
+			if (result_set.getInt(1) == 1) {
+				isData = true;
+			} else {
+				isData = false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (result_set != null)
+					result_set.close();
+				if (statement != null)
+					statement.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		disconnect();
+		return isData;
+	}
+	public int deleteData(String name, String fileName) {
+		String deleteData_sql = "DROP TABLE dataof_" + fileName + "_" + name;
+		int deleteData_int = 0;
+		System.out.println(deleteData_sql);
+
+		if(isData(fileName, name) == true) deleteData_int = executeUpdateSql(deleteData_sql);
+		return deleteData_int;
 	}
 
-	public int executeSql(String sql) {
+	public void deleteFileOfData(FileOfData fileofdata, int id, String name) {
+		String deleteFileOfData_sql = "delete from dataof_" + fileofdata.getFileName() + "_" + name + " where dataId = '" + id + "'";
+		int deleteFileOfData_int = executeUpdateSql(deleteFileOfData_sql);
+		
+		fileofdata.removeElementById(id);
+	}
+	
+	public void editFileOfData(FileOfData fileofdata, int select_id, String name, String edit_question, String edit_answer) {
+		String editFileOfData_sql = "UPDATE dataof_" + fileofdata.getFileName() + "_" + name
+				 + " SET question = '" + edit_question + "',"
+				 + "answer = '" + edit_answer + "' "
+				 + "WHERE dataId = " + select_id;
+		int editFileOfData_int = executeUpdateSql(editFileOfData_sql);
+		fileofdata.editElement(select_id, edit_question, edit_answer);
+	}
+	public int executeUpdateSql(String sql) {
 		Statement statement = null;
 		int result = 1;
 

@@ -9,8 +9,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import bean.UserInformationBean;
 import data_access_object.CreateUserDAO;
-import data_transfer_object.UserInformationDTO;
 import utils.StringUtils; 
 
 /**
@@ -53,7 +53,7 @@ public class CreateSuccessController extends HttpServlet {
     		CreateUserDAO create_dao = new CreateUserDAO();
             int isSuccessInsert = create_dao.createUser(name, pass);
             
-            UserInformationDTO userInfo_dto = create_dao.select();
+            UserInformationBean userInfo_dto = create_dao.select();
             request.setAttribute("userInfo_dto", userInfo_dto);
             
             
